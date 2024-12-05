@@ -1,67 +1,49 @@
-.container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-top: 36px;
+.js-form {
+    text-align: center;
+    margin-top: 24px;
+    margin-bottom: 24px;
+    
 }
-p {
-    margin: 0;
-  width: fit-content;
+.js-gallery{
+    display: flex;
+    flex-wrap: wrap;
+    text-decoration: none;
+    gap: 24px;
+    align-items: center;
+    justify-content: center;
 }
-.search-form {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 32px;
+.card{
+    flex-basis: calc(100% / 5);
+    color: currentColor;
+    text-decoration: none;
 }
-.input {
-  width: 280px;
-  height: 40px;
-  margin-right: 8px;
-  border-radius: 4px;
+.more{
+    display: block;
+ margin-left: auto;
+ margin-right: auto;
+ margin-top: 24px;
 }
-.btn {
-  width: 88px;
-  border-radius: 8px;
-  color: #fff;
-  background: #4E75FF;
-  cursor: pointer;
+.hidden{
+    display: none;
 }
-.gallery {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  align-items: center;
-  justify-content: center;
-}
-
-.gallery-link {
-  flex-basis: calc((100% - 24px) / 4);
-  text-decoration: none;
-  color: inherit;
-}
-.gallery-image {
-  width: 400px;
- }
 
 .loader {
-  width: 48px;
-  height: 48px;
-  border: 5px solid #137542;
-  border-bottom-color: transparent;
-  border-radius: 50%;
-  display: inline-block;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
+    width: 48px;
+    height: 48px;
+    border: 5px solid #FFF;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
 }
 
 @keyframes rotation {
-  0% {
-    transform: rotate(0deg);
-  }
+    0% {
+        transform: rotate(0deg);
+    }
 
-  100% {
-    transform: rotate(360deg);
-  }
+    100% {
+        transform: rotate(360deg);
+    }
 }

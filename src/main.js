@@ -1,101 +1,98 @@
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
-import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const formRef = document.querySelector('.search-form');
-const containerRef = document.querySelector('.container');
-const galleryRef = document.querySelector('.gallery');
+import { getImages } from './js/api';
+import { showCards } from './js/render';
 
-formRef.addEventListener('submit', onSubmit);
+const refs = {
+  form: document.querySelector('.js-form'),
+  gallery: document.querySelector('.js-gallery'),
+  more: document.querySelector('.more'),
+  loader: document.querySelector('.loader'),
+};
+let query;
+let page;
+let lastPage;
 
-function onSubmit(e) {
-  e.preventDefault();
+refs.form.addEventListener('submit', onSubmit);
+refs.more.addEventListener('click', onMore);
 
-  loaderOn();
+async function onSubmit(ev) {
+  ev.preventDefault();
+  page = 1;
+  showLoader();
+  try {
+    query = ev.target.elements.query.value.trim();
+    if (!query) {
+      showError('No query!');
+      return;
+    }
+    const data = await getImages(query, page);
+    if (data.total === 0) {
+      showError('No images matching your query found.');
+    }
+    lastPage = Math.ceil(data.total / 15);
 
-  galleryRef.innerHTML = '';
+    refs.gallery.innerHTML = '';
+    renderCards(data.hits);
+  } catch (err) {
+    showError(err);
+  }
 
-  const BASE_URL = 'https://pixabay.com/api/';
-  const API_KEY = '42059071-0978dc0d7158b742eee7c30f5';
-  const searchQuery = e.currentTarget.input.value;
-
-  fetch(
-    `${BASE_URL}?key=${API_KEY}&q=${encodeURIComponent(
-      searchQuery
-    )}&image_type=photo&orientation=horizontal&safesearch=true`
-  )
-    .then(resp => {
-      if (!resp.ok) {
-        throw new Error(resp.statusText);
-      }
-      return resp.json();
-    })
-    .then(data => {
-      if (data.hits.length === 0 || searchQuery === '') {
-        iziToast.error({
-          title: '',
-          message:
-            'Sorry, there are no images matching your search query. Please try again!',
-          position: 'topRight',
-        });
-
-        formRef.reset();
-      } else {
-        const markup = data.hits
-          .map(
-            ({
-              webformatURL,
-              largeImageURL,
-              tags,
-              likes,
-              views,
-              comments,
-              downloads,
-            }) => {
-              return `<a href="${largeImageURL}" class="gallery-link"><li class="gallery-item">
-          <img class="gallery-image" src="${webformatURL}" alt="${tags}">
-          <p>Likes: ${likes}</p>
-          <p>Views: ${views}</p>
-          <p>Comments: ${comments}</p>
-          <p>Downloads: ${downloads}</p>
-          </li></a>`;
-            }
-          )
-          .join('');
-
-        galleryRef.insertAdjacentHTML('beforeend', markup);
-
-        lightbox.refresh();
-
-        formRef.reset();
-      }
-    })
-    .catch(error => {
-      console.log(error);
-    })
-    .finally(() => {
-      loaderOff();
-    });
+  hideLoader();
+  checkMore();
+  ev.target.reset();
 }
 
-function loaderOn() {
-  const loader = document.createElement('span');
-  loader.classList.add('loader');
-  containerRef.append(loader);
+async function onMore() {
+  page += 1;
+  showLoader();
+
+  const data = await getImages(query, page);
+
+  renderCards(data.hits);
+  hideLoader();
+  checkMore();
+
+  const height = refs.gallery.getBoundingClientRect().height;
+
+  scrollBy({
+    behavior: 'smooth',
+    top: height * 2,
+  });
 }
-function loaderOff() {
-  const loader = document.querySelector('.loader');
-  if (loader) {
-    loader.remove();
+
+function renderCards(hits) {
+  const markup = showCards(hits);
+  refs.gallery.insertAdjacentHTML('beforeend', markup);
+}
+
+function showMore() {
+  refs.more.classList.remove('hidden');
+}
+
+function hideMore() {
+  refs.more.classList.add('hidden');
+}
+
+function checkMore() {
+  if (page >= lastPage) {
+    hideMore();
+  } else {
+    showMore();
   }
 }
-const optionsSL = {
-  captions: true,
-  captionSelector: 'img',
-  captionsData: 'alt',
-  captionPosition: 'bottom',
-  animation: 250,
-};
-const lightbox = new SimpleLightbox('.gallery a', optionsSL);
-lightbox.on('show.simplelightbox');
+function showLoader() {
+  refs.loader.classList.remove('hidden');
+}
+
+function hideLoader() {
+  refs.loader.classList.add('hidden');
+}
+function showError(msg) {
+  iziToast.error({
+    title: 'Error!',
+    message: msg,
+    position: 'center',
+  });
+}
